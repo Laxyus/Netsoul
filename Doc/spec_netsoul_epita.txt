@@ -1,0 +1,173 @@
+Specifications non officielles du protocol Netsoul - Epita
+Version du 31 octobre 2002 (Halloween release)
+
+
+  Ce papier est munie d'une structure qui me semble la meilleure pour la 
+redaction de celle ci (lire: j'ecris ca comme je le sens).
+Il decrit ce que j'ai pu apprendre en lisant les differentes sources des 
+clients, et en reproduisant differentes parties du protocole.
+
+  Pour ceux qui ne le savent pas, Epita/Epitech sont deux ecole d'informatique
+en France, situe au Kremlin bicetre (sud ouest de Paris).
+(liens: http://www.epita.fr/ ; http://www.epitech.net/)
+
+  Je ne suis pour ma part aucunement affilie de pres ou de loin a ces ecoles,
+redigeant cette documentation pour mettre un peu les choses au clairs pour
+certains.
+
+
+
+I. Sommaire
+
+  * I. Sommaire
+  * II. Presentation
+  * III. Phase d'authentification
+  * IV. Commandes
+
+
+II. Presentation
+
+  Les informations presentes dans ce papier feront surement l objet de
+modifications independantes de ma volonte. Sera independante de ma volonte
+egalement la mise a jour de ce texte, car je ne serai certainement pas
+motive pour continuer de chercher ce que les mainteneurs principaux
+de Netsoul-Epita (voir ci dessous) feront comme modifications dans le
+futur. Les informations sont actuelles a la date de derniere mise a jour
+de ce texte.
+
+  Au moment ou j ecris ces lignes, le seul serveur Netsoul-Epita 
+(Netsoul-Epita nommant le nom du protocole netsoul dans epita) se situe
+sur le port TCP 4242 et a l'adresse "ns-server.epita.fr" (163.5.255.80)
+(et en interne dans epita, 10.42.1.59)
+
+
+III. Phase d'authentification
+
+/*****/
+Connected to 163.5.255.80.
+Escape character is '^]'.
+salut 27 2fb93c1e8020c71ccf99f6555f70e56f 195.220.50.8 45686 1036068977
+auth_ag ext_user none none
+rep 002 -- cmd end
+rep 002 -- cmd end
+rep 001 -- no such cmd
+ext_user_log mycroft b2177622c14612a9b0e725b9c317026f none location
+rep 002 -- cmd end
+list_users *:mycroft@*
+27 mycroft 195.220.50.8 1036068990 1036069004 3 1 ~ none ext connection:1036068990 location
+rep 002 -- cmd end
+/*****/
+
+/***** Dans epita *****/
+[  debug: on 3 recv 'salut 1035 dd248f881a15302fdd850013f5ecb22e 10.42.14.10 62230 1037353039']
+[  debug: on 3 recv 'salut'],full_chalange=dd248f881a15302fdd850013f5ecb22e-10.42.14.10/62230
+[  debug: send_host_info(3)]
+[verbose: sending on 3 'auth_ag user csecret 6194abcbb4c87b26878a8217449cd269
+']
+[  debug: on 3 recv 'rep 002 -- cmd end']
+[verbose: sending on 3 'user_log mycroft bsd epita ext -
+
+/*****/
+
+
+IV. Commandes
+
+/****/
+state actif
+state away
+state paladutout
+
+state paladutout
+user_cmd 976:user:1/3:mycroft@213.36.79.53:~:none:ext | state paladutout
+
+/****/
+
+/****/
+user_cmd msg *:mycroft@* lalastringencode
+
+user_cmd msg 976:*@* hum
+user_cmd 976:user:1/3:mycroft@213.36.79.53:~:none:ext | hum
+
+/****/
+
+/****/
+user_cmd watch_log *:user:*:mycroft@*
+user_cmd 364:user:1/3:mycroft@213.36.79.53:~:death.minithins.net:ext | state actif:1036142854
+user_cmd 364:user:1/3:mycroft@213.36.79.53:~:death.minithins.net:ext | state lock:1036142858
+user_cmd 364:user:1/3:mycroft@213.36.79.53:~:death.minithins.net:ext | state away:1036142860
+user_cmd 364:user:1/3:mycroft@213.36.79.53:~:death.minithins.net:ext | state actif:1036142863
+
+/****/
+
+/****/
+list_users *:mycroft@*
+27 mycroft 195.220.50.8 1036068990 1036069004 3 1 ~ none ext connection:1036068990 location
+rep 002 -- cmd end
+/****/
+
+/****/
+user_cmd watch_log *:user:*:*@*
+user_cmd 374:user:3/1:poulay_c@10.42.21.62:NetBsd_wse:sm-21_r5p4:ept1 | logout
+user_cmd 1383:user:1/3:labour_f@212.194.176.151:~:maison:a3 | state lock:1036073127
+user_cmd 270:user:3/1:micolo_j@10.42.21.36:NetBsd_wse:sm-21_r3p8:ept1 | state idle:1036073417
+user_cmd 1232:user:3/1:marcel_r@10.42.22.36:NetBsd_wse:sm-22_r3p3:ept1 | state idle:1036073418
+user_cmd 367:user:3/1:elzein_k@10.42.15.15:NetBsd_wse:sm-15_r2p7:a1 | state actif:1036073419
+/****/
+
+/****/
+list_users *:mycroft@*
+1324 mycroft 195.220.50.8 1036072918 1036074332 3 1 ~ none ext connection:1036072918 lala
+rep 002 -- cmd end
+user_cmd user_data lala%20%lalalala
+list_users *:mycroft@*
+1324 mycroft 195.220.50.8 1036072918 1036074346 3 1 ~ none ext connection:1036072918 lala%20%lalalala
+rep 002 -- cmd end
+/****/
+
+/*** pour le watchlog ***/
+>> user_cmd 615:user:1/3:mycroft@212.83.191.227:~:toulouse%2eminithins%2enet:ext | login
+>> user_cmd 615:user:1/3:mycroft@212.83.191.227:~:toulouse%2eminithins%2enet:ext | state actif:1037399639
+>> user_cmd 615:user:1/3:mycroft@212.83.191.227:~:toulouse%2eminithins%2enet:ext | logout
+
+/****/
+
+Des fois, il envoit ca:
+/****/
+ping 600
+/****/
+ca semble etre apres 600 secondes d'inactivité; il faut lui envoyer "ping" 
+immédiatement sinon l'on est déconnecté.
+
+
+A la fin d'une session, un "exit" serait préférable.
+/****/
+exit
+/****/
+
+
+V. Remerciements, liens et conclusion
+
+  * Krp (nom, prenom) - pour la possibilite d'experimentation 
+                        a l'interieur d'Epita.
+  * Eole (nom, prenom) - pour ses pages de manuels des outils 
+                         existants
+  * L'auteur de la nslib (nom, prenom aka case) - pour m'avoir
+                        permis d'eclairer un certain nombre de
+                        points obscurs.
+
+  Liens:
+
+  http://www.epita.fr/
+  http://www.epitech.net/
+  
+  http://www.epita.fr/netsoul/
+  http://www.epitech.net/bnetsoul/
+
+  http://www.goubs.com/index.php3?koa=ns
+
+
+  Conclusion:
+
+  Fermer la diffusion du code source parce que l on a honte de montrer le fait
+que l on est pas capable de comprendre le code d autre gens apprenant a coder
+est la source de problemes.
