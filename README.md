@@ -1,4 +1,6 @@
-Netsoul-4.5
+Netsoul
 ===========
 
-Async wrapper for the netsoul protocol
+Async wrapper for the netsoul protocol and clients for:
+
+1. Windows8
