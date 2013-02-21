@@ -24,7 +24,7 @@ namespace Desktop
         public async void test()
         {
             netsoul.Login = "freier_n";
-            netsoul.Password = "a3L[aDn5";
+            netsoul.Password = "";
             netsoul.OnMessage += netsoul_OnMessage;
             var ret = await netsoul.ConnectAsync();
         }
