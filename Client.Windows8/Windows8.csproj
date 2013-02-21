@@ -109,7 +109,7 @@
       <Project>{1b771b9b-09ec-45eb-b386-b7e0c59767b5}</Project>
       <Name>NetsoulLib.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Netsoul\NetsoulLib.WinRT.csproj">
+    <ProjectReference Include="..\Netsoul.WinRT\NetsoulLib.WinRT.csproj">
       <Project>{bf8c985e-3ee4-4a42-89ad-4f6c3e075307}</Project>
       <Name>NetsoulLib.WinRT</Name>
     </ProjectReference>
