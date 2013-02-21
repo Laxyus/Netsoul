@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Xml.Serialization;
 using NetsoulLib;
+using NetsoulLib.Common;
 using Windows.Storage;
 using Windows.UI.Core;
 
@@ -68,12 +69,12 @@ namespace Windows8
                         }
                     }
                     string test = String.Empty;
-                    foreach (string s in this.NetSoul.Verif)
-                    {
-                        test += s;
-                    }
-                    if (this.NetSoul.ShutdownClient == true)
-                        test += "shutdown";
+                    //foreach (string s in this.NetSoul.Verif)
+                    //{
+                    //    test += s;
+                    //}
+                    //if (this.NetSoul.ShutdownClient == true)
+                    //    test += "shutdown";
                     this.ChatBox += test;
                     this.UpdateProperty("ChatBox");
                 }));
@@ -81,7 +82,8 @@ namespace Windows8
                 {
                     if (this.SelectedContact.Socket > 0)
                     {
-                        this.NetSoul.Message.Add(this.SelectedContact.Socket.ToString() + ":" + arg);
+                        this.NetSoul.Send(this.SelectedContact.Socket, arg);
+                      //  this.NetSoul.Message.Add(this.SelectedContact.Socket.ToString() + ":" + arg);
                         this.ChatBox += ">>> " + arg + "\n";
                         this.UpdateProperty("ChatBox");
                         this.SendBox = String.Empty;
@@ -101,16 +103,16 @@ namespace Windows8
                 {
                     await this.LoadContactList(UsernameText);
                     this.UpdateProperty("ContactList");
-                    this.NetSoul = new Netsoul(Server, Port);
-                    this.NetSoul.OnDataReceived += NetSoul_OnDataReceived;
-                    this.NetSoul.OnContactUpdated += NetSoul_OnContactUpdated;
-                    this.NetSoul.OnErrorRaised += NetSoul_OnErrorRaised;
-                    this.NetSoul.UserLogin = UsernameText;
-                    this.NetSoul.UserPassword = PasswordText;
+                    this.NetSoul = new NetsoulRT();
+                    //this.NetSoul.OnDataReceived += NetSoul_OnDataReceived;
+                  //  this.NetSoul.OnContactUpdated += NetSoul_OnContactUpdated;
+                    //this.NetSoul.OnErrorRaised += NetSoul_OnErrorRaised;
+                    this.NetSoul.Login = UsernameText;
+                    this.NetSoul.Password = PasswordText;
                     this.NetSoul.UserData = "WinRT-NetSoul";
                     if (LocationText != String.Empty)
                         this.NetSoul.UserLocation = LocationText;
-                    bool ret = await this.NetSoul.NetsoulConnectAsync();
+                    bool ret = await this.NetSoul.ConnectAsync();
                     if (ret == true)
                     {
                         this.UpdateWatchList();
@@ -118,20 +120,20 @@ namespace Windows8
                         this.UpdateProperty("Connected");
                         this.LoginBoxEnable = false;
                         this.UpdateProperty("LoginBoxEnable");
-                        this.NetSoul.StartServer();
+                        //this.NetSoul.StartServer();
                     }
                 }
             }
         }
 
-        void NetSoul_OnErrorRaised(object sender, EventArgs e)
-        {
-            foreach (string s in this.NetSoul.Errors)
-            {
-                NetsoulNotificationSystem.DisplayNotification(s, NetsoulNotificationType.Error);
-            }
-            this.NetSoul.Errors.Clear();
-        }
+        //void NetSoul_OnErrorRaised(object sender, EventArgs e)
+        //{
+        //    foreach (string s in this.NetSoul.Errors)
+        //    {
+        //        NetsoulNotificationSystem.DisplayNotification(s, NetsoulNotificationType.Error);
+        //    }
+        //    this.NetSoul.Errors.Clear();
+        //}
 
         private void UpdateWatchList()
         {
@@ -140,7 +142,7 @@ namespace Windows8
             {
                 Contacts.Add(c.Login);
             }
-            this.NetSoul.AddContact(Contacts);
+           // this.NetSoul.AddContact(Contacts);
         }
 
         private async Task LoadContactList(string Login)
@@ -214,21 +216,21 @@ namespace Windows8
 
         async void NetSoul_OnContactUpdated(object sender, NetSoulContactUpdateEventArgs e)
         {
-            string[] update = e.UpdatedContact.Split(':');
-            switch (update[0])
-            {
-                case "update":
-                    await this.UpdateContact(update);
-                    break;
-                case "logout":
-                    this.LogOutContact(update);
-                    break;
-                case "state":
-                    this.UpdateStateContact(update);
-                    break;
-                default:
-                    break;
-            }
+            //string[] update = e.UpdatedContact.Split(':');
+            //switch (update[0])
+            //{
+            //    case "update":
+            //        await this.UpdateContact(update);
+            //        break;
+            //    case "logout":
+            //        this.LogOutContact(update);
+            //        break;
+            //    case "state":
+            //        this.UpdateStateContact(update);
+            //        break;
+            //    default:
+            //        break;
+            //}
         }
 
         private async void UpdateStateContact(string[] update)
@@ -305,49 +307,49 @@ namespace Windows8
             this.UpdateProperty("ContactList");
         }
 
-        private async void NetSoul_OnDataReceived(object sender, NetSoulDataEventArgs e)
-        {
-            string tmp = String.Empty;
-            bool found = false;
-            int socket = -1;
-            while (this.NetSoul.Data.Count > 0)
-            {
-                tmp = this.NetSoul.Data[0];
-                if (this.Dispatch.HasThreadAccess == false)
-                    await this.Dispatch.RunAsync(CoreDispatcherPriority.Normal, new DispatchedHandler(new Action(() =>
-                    {
-                        NetsoulNotificationSystem.DisplayNotification("From " + tmp.Split(':')[1] + " at " + StringToUrlConverter.Convert(tmp.Split(':')[3], ConverterMode.UrlToStandard), NetsoulNotificationType.Message);
-                    })));
-                Int32.TryParse(tmp.Split(':')[2], out socket);
-                if (this.SelectedContact != null && tmp.Split(':')[1] == this.SelectedContact.Login && tmp.Split(':')[2] == this.SelectedContact.Socket.ToString())
-                {
-                    this.ChatBox += tmp.Split(':')[4] + "\n";
-                    this.UpdateProperty("ChatBox");
-                }
-                else
-                {
-                    for (int i = 0; i < this.ContactList.Count; i++)
-                    {
-                        if (tmp.Split(':')[1] == this.ContactList[i].Login && tmp.Split(':')[2] == this.ContactList[i].Socket.ToString())
-                        {
-                            this.ContactList[i].ConversationLog += tmp.Split(':')[4] + "\n";
-                            found = true;
-                        }
-                    }
-                    if (found == false)
-                    {
-                        if (this.Dispatch.HasThreadAccess == false)
-                            await this.Dispatch.RunAsync(CoreDispatcherPriority.Normal, new DispatchedHandler(new Action(() =>
-                                {
-                                    this.ContactList.Add(new ContactInfo(tmp.Split(':')[1], "unknown", "unknown", "none", socket));
-                                    this.ContactList.Last().ConversationLog += tmp.Split(':')[4] + "\n";
-                                })));
-                    }
-                }
-                this.NetSoul.Data.RemoveAt(0);
-            }
-            this.UpdateProperty("ContactList");
-        }
+        //private async void NetSoul_OnDataReceived(object sender, NetSoulDataEventArgs e)
+        //{
+        //    string tmp = String.Empty;
+        //    bool found = false;
+        //    int socket = -1;
+        //    while (this.NetSoul.Data.Count > 0)
+        //    {
+        //        tmp = this.NetSoul.Data[0];
+        //        if (this.Dispatch.HasThreadAccess == false)
+        //            await this.Dispatch.RunAsync(CoreDispatcherPriority.Normal, new DispatchedHandler(new Action(() =>
+        //            {
+        //                NetsoulNotificationSystem.DisplayNotification("From " + tmp.Split(':')[1] + " at " + StringToUrlConverter.Convert(tmp.Split(':')[3], ConverterMode.UrlToStandard), NetsoulNotificationType.Message);
+        //            })));
+        //        Int32.TryParse(tmp.Split(':')[2], out socket);
+        //        if (this.SelectedContact != null && tmp.Split(':')[1] == this.SelectedContact.Login && tmp.Split(':')[2] == this.SelectedContact.Socket.ToString())
+        //        {
+        //            this.ChatBox += tmp.Split(':')[4] + "\n";
+        //            this.UpdateProperty("ChatBox");
+        //        }
+        //        else
+        //        {
+        //            for (int i = 0; i < this.ContactList.Count; i++)
+        //            {
+        //                if (tmp.Split(':')[1] == this.ContactList[i].Login && tmp.Split(':')[2] == this.ContactList[i].Socket.ToString())
+        //                {
+        //                    this.ContactList[i].ConversationLog += tmp.Split(':')[4] + "\n";
+        //                    found = true;
+        //                }
+        //            }
+        //            if (found == false)
+        //            {
+        //                if (this.Dispatch.HasThreadAccess == false)
+        //                    await this.Dispatch.RunAsync(CoreDispatcherPriority.Normal, new DispatchedHandler(new Action(() =>
+        //                        {
+        //                            this.ContactList.Add(new ContactInfo(tmp.Split(':')[1], "unknown", "unknown", "none", socket));
+        //                            this.ContactList.Last().ConversationLog += tmp.Split(':')[4] + "\n";
+        //                        })));
+        //            }
+        //        }
+        //        this.NetSoul.Data.RemoveAt(0);
+        //    }
+        //    this.UpdateProperty("ContactList");
+        //}
 
         public void ContactListSelectionChanged(int idx)
         {

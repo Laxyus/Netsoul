@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NetsoulLib;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
@@ -31,6 +32,32 @@ namespace Windows8
         {
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+
+            this.TestNetsoulV2();
+        }
+
+        NetsoulRT rt = new NetsoulRT();
+        private async void TestNetsoulV2()
+        {
+
+            //rt.Login = "freier_n";
+            //rt.Password = "";
+            //rt.UserLocation = "Test";
+
+            //rt.OnMessage += rt_OnMessage;
+            //rt.OnContactUpdate += rt_OnContactUpdate;
+            //var ret = await rt.ConnectAsync();
+
+            //var ret2 = await rt.AddContact("freier_n");
+        }
+
+        void rt_OnContactUpdate(object sender, NetsoulLib.Common.NetSoulContactUpdateEventArgs e)
+        {
+        }
+
+        async void rt_OnMessage(object sender, NetsoulLib.Common.NetsoulMessageEventArgs e)
+        {
+            var ret = await rt.Send(e.UserSocket, e.Message);
         }
 
         /// <summary>

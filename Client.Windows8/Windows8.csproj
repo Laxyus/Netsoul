@@ -105,9 +105,13 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\Netsoul\NetsoulLib.csproj">
+    <ProjectReference Include="..\NetsoulLib.Common\NetsoulLib.Common.csproj">
+      <Project>{1b771b9b-09ec-45eb-b386-b7e0c59767b5}</Project>
+      <Name>NetsoulLib.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Netsoul\NetsoulLib.WinRT.csproj">
       <Project>{bf8c985e-3ee4-4a42-89ad-4f6c3e075307}</Project>
-      <Name>NetsoulLib</Name>
+      <Name>NetsoulLib.WinRT</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +125,7 @@
     <Compile Include="Common\RichTextColumns.cs" />
     <Compile Include="Common\SuspensionManager.cs" />
     <Compile Include="ConnectionInfo.cs" />
+    <Compile Include="ContactInfo.cs" />
     <Compile Include="LoginPage.xaml.cs">
       <DependentUpon>LoginPage.xaml</DependentUpon>
     </Compile>

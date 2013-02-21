@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NetsoulLib
+namespace SoulLib
 {
     public class NetSoulContactUpdateEventArgs : EventArgs
     {

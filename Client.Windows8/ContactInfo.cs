@@ -2,24 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Serialization;
+using NetsoulLib.Common;
 using Windows.UI;
 using Windows.UI.Xaml.Media;
 
-namespace NetsoulLib
+namespace Windows8
 {
-    public enum ContactStatus
-    {
-        Online,
-        Away,
-        Connection,
-        Idle,
-        Lock,
-        None,
-        Server,
-        Offline
-    }
-
     public class ContactInfo
     {
         public string Login { get; set; }

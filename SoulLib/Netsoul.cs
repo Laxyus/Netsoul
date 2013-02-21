@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
-#if NETFX_CORE
 using Windows.Foundation;
 using Windows.Networking;
 using Windows.Networking.Sockets;
@@ -13,13 +12,8 @@ using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Core;
 using Windows.Storage;
 using Windows.Storage.Streams;
-#else
-using System.Net.Sockets;
-using System.Net;
-using System.Threading;
-#endif
 
-namespace NetsoulLib
+namespace SoulLib
 {
     public class Netsoul
     {
@@ -37,16 +31,9 @@ namespace NetsoulLib
         private List<string> ReadBufferList;
         private bool IsReading;
 
-#if NETFX_CORE
         private DataReader StreamReader;
         private DataWriter StreamWriter;
         private StreamSocket Client;
-#else
-        private Socket Client;
-        private static ManualResetEvent connectDone = new ManualResetEvent(false);
-        private static ManualResetEvent sendDone = new ManualResetEvent(false);
-        private static ManualResetEvent receiveDone = new ManualResetEvent(false);
-#endif
 
         /// <summary>
         /// Get the connection status of the client
@@ -121,11 +108,7 @@ namespace NetsoulLib
         {
             this.Verif = new List<string>();
             this.ReadBufferList = new List<string>();
-#if NETFX_CORE
             this.Client = new StreamSocket();
-#else
-            this.Client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-#endif
             this.ServerName = serverHostName;
             this.ServerPort = serverPort;
             this.Data = new List<string>();
@@ -160,21 +143,7 @@ namespace NetsoulLib
             {
                 try
                 {
-#if NETFX_CORE
                     await this.Client.ConnectAsync(new HostName(this.ServerName), this.ServerPort.ToString(), SocketProtectionLevel.PlainSocket);
-#else
-                    await Task.Run(() =>
-                         {
-                             this.Client.BeginConnect(this.ServerName, this.ServerPort, r =>
-                                 {
-                                     Socket client = (Socket)r.AsyncState;
-                                     client.EndConnect(r);
-                                     connectDone.Set();
-                                 }, this.Client);
-                             connectDone.WaitOne();
-                         });
-#endif
-
                     this.IsConnected = true;
                     return true;
                 }
@@ -281,7 +250,6 @@ namespace NetsoulLib
         /// <returns></returns>
         private async Task InitializeConnection()
         {
-#if NETFX_CORE
             this.StreamReader = new DataReader(this.Client.InputStream);
             this.StreamReader.InputStreamOptions = InputStreamOptions.Partial;
             this.StreamWriter = new DataWriter(this.Client.OutputStream);
@@ -311,7 +279,6 @@ namespace NetsoulLib
                 await this.StreamWriter.StoreAsync();
                 buffer = String.Empty;
             }
-#endif
         }
         /// <summary>
         /// Create the proper syntax for update commands who and watch_log_user 
@@ -341,14 +308,12 @@ namespace NetsoulLib
         /// <param name="buffer">Data to parse received from the server</param>
         private async void ConnectionInfoParsing(string buffer)
         {
-#if NETFX_CORE
             string[] parsing = buffer.Split(' ');
             this.ClientSocket = parsing[1];
             this.RandomMD5 = parsing[2];
             this.ClientIp = parsing[3];
             this.ClientPort = parsing[4];
             this.TimeStamp = parsing[5];
-
             HashAlgorithmProvider md5 = HashAlgorithmProvider.OpenAlgorithm("MD5");
             CryptographicHash Hasher = md5.CreateHash();
             IBuffer bufferMessage = CryptographicBuffer.ConvertStringToBinary(this.RandomMD5
@@ -358,11 +323,9 @@ namespace NetsoulLib
             IBuffer NewMD5Buffer = Hasher.GetValueAndReset();
             this.NewMD5 = CryptographicBuffer.EncodeToHexString(NewMD5Buffer);
             this.NewMD5 = this.NewMD5.ToLower();
-           
             this.StreamWriter.WriteString("auth_ag ext_user none none\n");
             this.Verif.Add(">>> " + "auth_ag ext_user none none\n");
             await this.StreamWriter.StoreAsync();
-#endif
         }
         /// <summary>
         /// Asynchronous read on the network stream.
@@ -370,7 +333,6 @@ namespace NetsoulLib
         /// <returns>Returns the data read</returns>
         private async void ReadData()
         {
-#if NETFX_CORE
             string buffer = String.Empty;
             this.IsReading = true;
             while (buffer.Contains("\n") == false)
@@ -396,114 +358,14 @@ namespace NetsoulLib
                             this.ReadBufferList.Add(bufferlist[i]);
                 }
             this.IsReading = false;
-#endif
         }
         /// <summary>
         /// Asynchronous send on the network stream.
         /// </summary>
         private async void SendData()
         {
-#if NETFX_CORE
-            //this.StreamWriter.WriteString(str);
             await this.StreamWriter.StoreAsync();
-#else
-            await Task.Run(() =>
-                {
-                    Netsoul.Send(this.Client, str);
-                    sendDone.Set();
-                });
-            sendDone.WaitOne();
-#endif
         }
-
-#if !NETFX_CORE
-
-        private static void Receive(Socket client)
-        {
-            try
-            {
-                // Create the state object.
-                StateObject state = new StateObject();
-                state.workSocket = client;
-
-                // Begin receiving the data from the remote device.
-                client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                    new AsyncCallback(ReceiveCallback), state);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-
-        private static void ReceiveCallback(IAsyncResult ar)
-        {
-            try
-            {
-                // Retrieve the state object and the client socket 
-                // from the asynchronous state object.
-                StateObject state = (StateObject)ar.AsyncState;
-                Socket client = state.workSocket;
-
-                // Read data from the remote device.
-                int bytesRead = client.EndReceive(ar);
-
-                if (bytesRead > 0)
-                {
-                    // There might be more data, so store the data received so far.
-                    state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
-
-                    // Get the rest of the data.
-                    client.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0,
-                        new AsyncCallback(ReceiveCallback), state);
-                }
-                else
-                {
-                    // All the data has arrived; put it in response.
-                    if (state.sb.Length > 1)
-                    {
-                        response = state.sb.ToString();
-                    }
-                    // Signal that all bytes have been received.
-                    receiveDone.Set();
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-
-
-        private static void Send(Socket client, String data)
-        {
-            // Convert the string data to byte data using ASCII encoding.
-            byte[] byteData = Encoding.ASCII.GetBytes(data);
-
-            // Begin sending the data to the remote device.
-            client.BeginSend(byteData, 0, byteData.Length, 0,
-                new AsyncCallback(SendCallback), client);
-        }
-
-        private static void SendCallback(IAsyncResult ar)
-        {
-            try
-            {
-                // Retrieve the socket from the state object.
-                Socket client = (Socket)ar.AsyncState;
-
-                // Complete sending the data to the remote device.
-                int bytesSent = client.EndSend(ar);
-
-                // Signal that all bytes have been sent.
-                sendDone.Set();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.ToString());
-            }
-        }
-#endif
 
         public void StartServer()
         {
@@ -525,7 +387,6 @@ namespace NetsoulLib
                     if (str != null)
                     {
                         this.Verif.Add(">>> " + str);
-                       // this.SendData(str);
                         this.StreamWriter.WriteString(str);
                         this.SendData();
                     }
@@ -544,14 +405,13 @@ namespace NetsoulLib
         /// </summary>
         private void FormatData()
         {
-#if NETFX_CORE
+
             string formatted = String.Empty;
             formatted = "user_cmd msg_user {:" + this.Message[0].Split(':')[0] + "} msg " + StringToUrlConverter.Convert(this.Message[0].Split(':')[1] + "\n", ConverterMode.StandardToUrl);
             this.StreamWriter.WriteString(formatted);
             this.Message.RemoveAt(0);
             this.Verif.Add(">>> " + formatted);
             this.SendData();
-#endif
         }
 
         /// <summary>
