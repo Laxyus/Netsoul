@@ -36,6 +36,7 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Contact.cs" />
     <Compile Include="ContactStatus.cs" />
     <Compile Include="INetsoul.cs" />
     <Compile Include="Netsoul.cs" />

@@ -126,7 +126,6 @@ namespace NetsoulLib.Common
                 {
                     case "ping":
                         await this.SendData(buffer);
-                        //this.SendDataList.Add(buffer);
                         break;
                     case "user_cmd":
                         if (buffer.Contains("|"))
