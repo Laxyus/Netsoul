@@ -1,10 +1,51 @@
-﻿<Controls:MetroWindow x:Class="Desktop.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
-        Title="MetroSoul" Height="600" Width="300"
-        ResizeMode="NoResize">
-    <Grid>
-
-    </Grid>
+﻿<Controls:MetroWindow
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      xmlns:vm="clr-namespace:Desktop.ViewModel"
+                      xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity" x:Class="Desktop.MainWindow"
+                      Title="MetroSoul"
+                      Width="300"
+                      Height="600"
+                      ResizeMode="NoResize">
+    <Controls:MetroWindow.Resources>
+        <DataTemplate x:Key="DataTemplate1">
+        	<Grid>
+        		<TextBlock Text="ff}" />
+        	</Grid>
+        </DataTemplate>
+    </Controls:MetroWindow.Resources>
+    <Controls:MetroWindow.DataContext>
+        <vm:Home />
+    </Controls:MetroWindow.DataContext>
+	<i:Interaction.Triggers>
+		<i:EventTrigger>
+			<i:InvokeCommandAction Command="{Binding LoadedCMD}"/>
+		</i:EventTrigger>
+	</i:Interaction.Triggers>
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="571" />
+		</Grid.RowDefinitions>
+		<Grid Margin="10">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="150"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
+			<StackPanel Margin="0">
+				<TextBox Background="#FFE4E8E8" Text="{Binding IsLogued}" BorderThickness="0" />
+				<StackPanel Margin="0,2,0,0" Orientation="Horizontal">
+					<Rectangle Fill="#FFF4F4F5" HorizontalAlignment="Left" Height="75" Margin="0" Stroke="Black" Width="75" StrokeThickness="0"/>
+					<StackPanel Orientation="Vertical" Margin="10,0,0,0">
+						<TextBlock TextWrapping="Wrap" Text="Niels Freier" Margin="0,0,-0.001,0"/>
+						<ComboBox  Margin="0,0,-0.001,0"/>
+						<ComboBox  Margin="0,0,-0.001,0"/>
+					</StackPanel>
+				</StackPanel>
+			</StackPanel>
+			<ListBox
+				Background="White"
+				ItemsSource="{Binding Contacts}" ItemTemplate="{DynamicResource DataTemplate1}" Margin="0" Grid.Row="1" />
+		</Grid>
+	</Grid>
 </Controls:MetroWindow>
