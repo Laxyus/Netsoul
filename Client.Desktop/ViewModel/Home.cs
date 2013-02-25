@@ -15,8 +15,13 @@ namespace Desktop.ViewModel
 {
     public class Home : ViewModelBase
     {
+        private const string imagePath = "https://www.epitech.eu/intra/photos/{0}.jpg";
+
         private INetsoul netsoul;
         private Dispatcher disp;
+        private string image;
+        private string login;
+        private int selectedContact;
 
         private bool isLogued;
         public bool IsLogued
@@ -31,7 +36,45 @@ namespace Desktop.ViewModel
             }
         }
 
+        public int SelectedContact
+        {
+            get
+            {
+                return this.selectedContact;
+            }
+            set
+            {
+                this.SetProperty(ref this.selectedContact, value, "SelectedContact");
+            }
+        }
+
+        public string Login
+        {
+            get
+            {
+                return this.login;
+            }
+            set
+            {
+                this.SetProperty(ref this.login, value, "Login");
+                this.OnPropertyChanged("Image");
+            }
+        }
+        public string Image
+        {
+            get
+            {
+                return string.Format(imagePath, this.Login);
+            }
+            set
+            {
+                this.SetProperty(ref this.login, string.Format(imagePath, value), "Image");
+            }
+        }
+
         public ICommand LoadedCMD { get; set; }
+        public ICommand OpenSettingsCMD { get; set; }
+        public ICommand TalkCMD { get; set; }
 
         public ObservableCollection<Contact> Contacts { get; set; }
 
@@ -41,6 +84,22 @@ namespace Desktop.ViewModel
             this.Contacts = new ObservableCollection<Contact>();
 
             this.LoadedCMD = new RelayCommand(OnLoaded);
+            this.OpenSettingsCMD = new RelayCommand(() =>
+                {
+                    View.Settings settings = new View.Settings();
+                    settings.Show();
+                });
+
+            this.TalkCMD = new RelayCommand(() =>
+                {
+                    if (this.SelectedContact != -1)
+                    {
+                        View.Talk talk = new View.Talk();
+                        ViewModel.Talk talkVM = new Talk(this.Login, this.Contacts[this.SelectedContact], this.netsoul);
+                        talk.DataContext = talkVM;
+                        talk.Show();
+                    }
+                });
         }
 
         private async void OnLoaded()
@@ -53,14 +112,32 @@ namespace Desktop.ViewModel
             {
                 await this.Connect();
                 await this.LoadFriendList();
-
-                this.Contacts.Add(new Contact());
             }
         }
 
         private async Task LoadFriendList()
         {
+            if (Properties.Settings.Default.Friends != null)
+            {
+                var lst = new List<string>();
+                foreach (var friend in Properties.Settings.Default.Friends)
+                {
+                    await this.netsoul.AddContact(friend);
+                    this.Contacts.Add(new Contact() { Login = friend, Status = ContactStatus.Offline });
+
+                    lst.Add(friend);
+                }
+
+                await this.netsoul.RefreshContacts(lst);
+            }
+
+            await this.netsoul.AddContact("dupova_m");
+            this.Contacts.Add(new Contact() { Login = "dupova_m", Status = ContactStatus.Offline });
             await this.netsoul.AddContact("freier_n");
+            this.Contacts.Add(new Contact() { Login = "freier_n", Status = ContactStatus.Offline });
+
+            await this.netsoul.RefreshContact("freier_n");
+            await this.netsoul.RefreshContact("dupova_m");
         }
 
         private void netsoul_OnContactUpdate(object sender, NetSoulContactUpdateEventArgs e)
@@ -68,15 +145,13 @@ namespace Desktop.ViewModel
             var contact = this.Contacts.Where(c => c.Login == e.Contact.Login).FirstOrDefault();
             if (contact != null)
             {
-                if (e.Contact.Status == ContactStatus.Offline)
-                {
-                    this.Contacts.Remove(contact);
-                }
-                else
-                {
-                    contact.Status = e.Contact.Status;
-                    contact.Location = e.Contact.Location;
-                }
+
+                this.disp.Invoke(() =>
+                   {
+                       contact.Status = e.Contact.Status;
+                       contact.Location = e.Contact.Location;
+                       contact.UserSocket = e.Contact.UserSocket;
+                   });
             }
             else
             {
@@ -90,9 +165,7 @@ namespace Desktop.ViewModel
                     c.UserSocket = e.Contact.UserSocket;
                     this.disp.Invoke(() =>
                         {
-                            Console.WriteLine("fff");
                             this.Contacts.Add(c);
-                            Console.WriteLine("ddd");
                         });
                 }
             }
@@ -100,9 +173,20 @@ namespace Desktop.ViewModel
 
         private async Task Connect()
         {
-            this.netsoul.Login = "freier_n";
-            this.netsoul.Password = "a3L[aDn5";
+            if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.Login) && !string.IsNullOrWhiteSpace(Properties.Settings.Default.Password))
+            {
+                this.netsoul.Login = Properties.Settings.Default.Login;
+                this.netsoul.Password = Properties.Settings.Default.Password;
+            }
+            else
+            {
+                View.Settings settings = new View.Settings();
+                settings.ShowDialog();
+                this.netsoul.Login = Properties.Settings.Default.Login;
+                this.netsoul.Password = Properties.Settings.Default.Password;
+            }
             this.IsLogued = await this.netsoul.ConnectAsync();
+            this.Login = this.netsoul.Login;
         }
     }
 }

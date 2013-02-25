@@ -1,0 +1,27 @@
+﻿<Controls:MetroWindow x:Class="Desktop.View.Settings"
+                      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                      xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+                      xmlns:vm="clr-namespace:Desktop.ViewModel"
+                      Title="Settings"
+                      Width="800"
+                      Height="640">
+    <Controls:MetroWindow.DataContext>
+        <vm:Settings />
+    </Controls:MetroWindow.DataContext>
+    <Grid>
+        <StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Login:" />
+                <TextBox Width="200" Text="{Binding Login}" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="password:" />
+                <TextBox Width="200" Text="{Binding Password}" />
+            </StackPanel>
+            <Button Click="Button_Click"
+                    Command="{Binding SaveCMD}"
+                    Content="Save" />
+        </StackPanel>
+    </Grid>
+</Controls:MetroWindow>

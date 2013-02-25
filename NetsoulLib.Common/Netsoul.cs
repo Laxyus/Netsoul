@@ -103,6 +103,25 @@ namespace NetsoulLib.Common
             return await this.AddContacts(new List<string>() { contact });
         }
 
+        public async Task<bool> RefreshContact(string contact)
+        {
+            return await this.RefreshContacts(new List<string>() { contact });
+        }
+
+        public async Task<bool> RefreshContacts(List<string> contacts)
+        {
+            StringBuilder str = new StringBuilder("user_cmd who  {");
+            for (int i = 0; i < contacts.Count; i++)
+            {
+                if (i > 0)
+                    str.Append(",");
+                str.Append(contacts[i]);
+            }
+            str.Append("}\n");
+
+            return await this.SendData(str.ToString());
+        }
+
         public async Task<bool> AddContacts(List<string> contacts)
         {
             StringBuilder str = new StringBuilder("user_cmd watch_log_user {");
@@ -147,7 +166,13 @@ namespace NetsoulLib.Common
                                     parse = buffer.Split('|')[1].Split(' ');
                                     if (parse[2] == "rep")
                                         break;
-                                    //this.UpdateContact(parse[3], parse[12].Split(':')[0], parse[10], parse[13].Split('\n')[0], parse[2]);
+                                    var t1 = parse[3];
+                                    var t2 = parse[12].Split(':')[0];
+                                    var t3 = parse[10];
+                                    var t4 = parse[13].Split('\n')[0];
+                                    var t5 = parse[2];
+                                    if (this.OnContactUpdate != null)
+                                        this.OnContactUpdate(this, new NetSoulContactUpdateEventArgs(parse[3], NetsoulHelper.GetStatus(parse[12].Split(':')[0]), parse[10], parse[13].Split('\n')[0], parse[2]));
                                     break;
                                 case "login":
                                 case "state":

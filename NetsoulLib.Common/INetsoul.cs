@@ -23,6 +23,9 @@ namespace NetsoulLib.Common
 
         Task<bool> Send(int userSocket, string message);
 
+        Task<bool> RefreshContact(string contact);
+        Task<bool> RefreshContacts(List<string> contacts);
+
         Task<bool> AddContact(string contact);
         Task<bool> AddContacts(List<string> contacts);
     }
