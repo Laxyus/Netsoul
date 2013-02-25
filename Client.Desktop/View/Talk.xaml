@@ -5,22 +5,28 @@
                       xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
                       xmlns:vm="clr-namespace:Desktop.ViewModel"
                       Title="Talk"
-                      Width="800"
-                      Height="640">
+                      Width="600"
+                      Height="540">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="75" />
             <RowDefinition Height="*" />
             <RowDefinition Height="200" />
         </Grid.RowDefinitions>
-        <ListBox ItemsSource="{Binding Messages}" />
-        <Grid Grid.Row="1">
+        <StackPanel Orientation="Horizontal">
+            <Image Source="{Binding ImageSender}" />
+            <TextBlock Text="{Binding LoginSender}" />
+        </StackPanel>
+        <ListBox Grid.Row="1" ItemsSource="{Binding Messages}" />
+        <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="100" />
             </Grid.ColumnDefinitions>
             <TextBox AcceptsReturn="True"
                      MaxLength="512"
-                     Text="{Binding Text}" />
+                     Text="{Binding Text,
+                                    Mode=TwoWay}" />
             <Button Grid.Column="1"
                     Command="{Binding SendCMD}"
                     Content="Send" />

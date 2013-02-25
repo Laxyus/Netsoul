@@ -16,6 +16,8 @@ namespace NetsoulLib.Common
         string UserData { get; set; }
         bool IsLogued { get; }
 
+        ContactStatus Status { get; set; }
+
         event EventHandler<NetsoulMessageEventArgs> OnMessage;
         event EventHandler<NetSoulContactUpdateEventArgs> OnContactUpdate;
 

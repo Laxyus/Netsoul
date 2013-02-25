@@ -40,7 +40,7 @@ namespace Desktop.ViewModel
         {
             get
             {
-                return string.Format(imageSender, this.Login);
+                return string.Format(imagePath, this.Login);
             }
             set
             {
@@ -106,7 +106,7 @@ namespace Desktop.ViewModel
         {
             this.netsoul.Send(this.contact.UserSocket, this.Text);
             this.InsertMessage(this.login, this.Text);
-            this.text = string.Empty;
+            this.Text = string.Empty;
         }
 
         void netsoul_OnMessage(object sender, NetsoulMessageEventArgs e)

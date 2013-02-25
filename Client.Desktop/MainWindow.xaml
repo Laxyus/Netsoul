@@ -63,8 +63,8 @@
                         <TextBlock Margin="0,0,-0.001,0"
                                    Text="Niels Freier"
                                    TextWrapping="Wrap" />
-                        <ComboBox Margin="0,0,-0.001,0" />
-                        <ComboBox Margin="0,0,-0.001,0" />
+                        <ComboBox ItemsSource="{Binding Status}" SelectedIndex="{Binding SelectedStatus}" />
+                        <ComboBox />
                     </StackPanel>
                     <Button Command="{Binding OpenSettingsCMD}" Content="Settings" />
                     <Button Command="{Binding TalkCMD}" Content="Open Msg" />

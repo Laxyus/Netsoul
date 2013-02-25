@@ -19,9 +19,9 @@ namespace Desktop.ViewModel
 
         private INetsoul netsoul;
         private Dispatcher disp;
-        private string image;
         private string login;
-        private int selectedContact;
+        private int selectedContact = -1;
+        private int selectedStatus = 0;
 
         private bool isLogued;
         public bool IsLogued
@@ -45,6 +45,19 @@ namespace Desktop.ViewModel
             set
             {
                 this.SetProperty(ref this.selectedContact, value, "SelectedContact");
+            }
+        }
+        public int SelectedStatus
+        {
+            get
+            {
+                return this.selectedStatus;
+            }
+            set
+            {
+                this.SetProperty(ref this.selectedStatus, value, "SelectedStatus");
+                if (this.netsoul.IsLogued)
+                    this.netsoul.Status = (ContactStatus)this.SelectedStatus;
             }
         }
 
@@ -77,39 +90,50 @@ namespace Desktop.ViewModel
         public ICommand TalkCMD { get; set; }
 
         public ObservableCollection<Contact> Contacts { get; set; }
+        public ObservableCollection<string> Status { get; set; }
 
         public Home()
         {
-            this.disp = App.Current.MainWindow.Dispatcher;
-            this.Contacts = new ObservableCollection<Contact>();
+            bool designTime = System.ComponentModel.DesignerProperties.GetIsInDesignMode(new DependencyObject());
+            if (designTime == false)
+            {
+                this.disp = App.Current.MainWindow.Dispatcher;
+                this.Contacts = new ObservableCollection<Contact>();
 
-            this.LoadedCMD = new RelayCommand(OnLoaded);
-            this.OpenSettingsCMD = new RelayCommand(() =>
-                {
-                    View.Settings settings = new View.Settings();
-                    settings.Show();
-                });
-
-            this.TalkCMD = new RelayCommand(() =>
-                {
-                    if (this.SelectedContact != -1)
+                this.LoadedCMD = new RelayCommand(OnLoaded);
+                this.OpenSettingsCMD = new RelayCommand(() =>
                     {
-                        View.Talk talk = new View.Talk();
-                        ViewModel.Talk talkVM = new Talk(this.Login, this.Contacts[this.SelectedContact], this.netsoul);
-                        talk.DataContext = talkVM;
-                        talk.Show();
-                    }
-                });
+                        View.Settings settings = new View.Settings();
+                        settings.Show();
+                    });
+
+                this.TalkCMD = new RelayCommand(() =>
+                    {
+                        if (this.SelectedContact != -1)
+                        {
+                            View.Talk talk = new View.Talk();
+                            ViewModel.Talk talkVM = new Talk(this.Login, this.Contacts[this.SelectedContact], this.netsoul);
+                            talk.DataContext = talkVM;
+                            talk.Show();
+                        }
+                    });
+
+                this.Status = new ObservableCollection<string>();
+                foreach (var st in Enum.GetValues(typeof(ContactStatus)))
+                {
+                    this.Status.Add(st.ToString());
+                }
+            }
         }
 
         private async void OnLoaded()
         {
-            this.netsoul = new NetsoulDesktop();
-            this.netsoul.OnContactUpdate += netsoul_OnContactUpdate;
-
             bool designTime = System.ComponentModel.DesignerProperties.GetIsInDesignMode(new DependencyObject());
             if (designTime == false)
             {
+                this.netsoul = new NetsoulDesktop();
+                this.netsoul.OnContactUpdate += netsoul_OnContactUpdate;
+
                 await this.Connect();
                 await this.LoadFriendList();
             }
@@ -128,7 +152,7 @@ namespace Desktop.ViewModel
                     lst.Add(friend);
                 }
 
-                await this.netsoul.RefreshContacts(lst);
+                // await this.netsoul.RefreshContacts(lst);
             }
 
             await this.netsoul.AddContact("dupova_m");
@@ -136,8 +160,9 @@ namespace Desktop.ViewModel
             await this.netsoul.AddContact("freier_n");
             this.Contacts.Add(new Contact() { Login = "freier_n", Status = ContactStatus.Offline });
 
-            await this.netsoul.RefreshContact("freier_n");
-            await this.netsoul.RefreshContact("dupova_m");
+            await this.netsoul.RefreshContacts(new List<string> { "freier_n", "dupova_m" });
+            //await this.netsoul.RefreshContact("freier_n");
+            //await this.netsoul.RefreshContact("dupova_m");
         }
 
         private void netsoul_OnContactUpdate(object sender, NetSoulContactUpdateEventArgs e)

@@ -166,11 +166,11 @@ namespace NetsoulLib.Common
                                     parse = buffer.Split('|')[1].Split(' ');
                                     if (parse[2] == "rep")
                                         break;
-                                    var t1 = parse[3];
-                                    var t2 = parse[12].Split(':')[0];
-                                    var t3 = parse[10];
-                                    var t4 = parse[13].Split('\n')[0];
-                                    var t5 = parse[2];
+                                    //var t1 = parse[3];
+                                    //var t2 = parse[12].Split(':')[0];
+                                    //var t3 = parse[10];
+                                    //var t4 = parse[13].Split('\n')[0];
+                                    //var t5 = parse[2];
                                     if (this.OnContactUpdate != null)
                                         this.OnContactUpdate(this, new NetSoulContactUpdateEventArgs(parse[3], NetsoulHelper.GetStatus(parse[12].Split(':')[0]), parse[10], parse[13].Split('\n')[0], parse[2]));
                                     break;
@@ -237,7 +237,6 @@ namespace NetsoulLib.Common
                     var buffer = this.ReadData();
                     buffer.Wait();
                     this.ParseReceivedData(buffer.Result);
-                    Debug.WriteLine(buffer);
                 }
             });
 
